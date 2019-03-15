@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
@@ -15,22 +16,29 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import com.r416.neon.Neon;
 import com.r416.neon.Scenes.Hud;
+import com.r416.neon.Sprites.Player;
+
+import static com.r416.neon.Neon.G_HEIGHT;
+import static com.r416.neon.Neon.G_WIDTH;
 
 public class PlayScreen implements Screen {
     private Neon game;
     private OrthographicCamera gameCam;
     private Viewport gamePort;
     private Hud hud;
-
+    private Player player;
     private TmxMapLoader mapLoader;
     private TiledMap map;
     private TiledMapRenderer r;
+   // private SpriteBatch batch;
 
     public PlayScreen(Neon game){
         this.game = game;
 
         gameCam = new OrthographicCamera();
-        gamePort = new FitViewport(game.G_WIDTH, game.G_HEIGHT, gameCam);
+        gamePort = new FitViewport(G_WIDTH, G_HEIGHT, gameCam);
+        player = new Player(gamePort, game);
+      //  batch = new SpriteBatch();
         hud = new Hud(game.batch);
         map = new TmxMapLoader().load("ProjectNeon.tmx");
         r = new OrthogonalTiledMapRenderer(map);
@@ -41,7 +49,7 @@ public class PlayScreen implements Screen {
 
     }
 
-    public void handleInput(float dt){
+    private void handleInput(float dt){
         if(Gdx.input.isKeyPressed(Input.Keys.W)){
             gameCam.translate(0, 100 * dt);
         }
@@ -58,9 +66,10 @@ public class PlayScreen implements Screen {
             Gdx.app.exit();
         }
     }
-    public void update(float dt){
+    private void update(float dt){
         handleInput(dt);
         gameCam.update();
+        player.update();
         r.setView(gameCam);
     }
 
@@ -70,10 +79,15 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+
         r.render();
 
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+        game.batch.begin();
+        player. render(delta, game.batch);
+        game.batch.end();
         hud.stage.draw();
+
 
     }
 
